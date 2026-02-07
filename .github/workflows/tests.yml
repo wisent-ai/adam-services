@@ -1,0 +1,33 @@
+name: Tests
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Run tests
+        run: |
+          python -m pytest test_service.py -v --tb=short
+
+      - name: Smoke test server startup
+        run: |
+          timeout 5 python service.py &
+          sleep 2
+          curl -s http://localhost:8080/health | python -c "import sys,json; d=json.load(sys.stdin); assert d['status']=='healthy'; print('Health check OK')"
+        continue-on-error: true
