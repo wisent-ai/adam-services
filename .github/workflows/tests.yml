@@ -23,7 +23,7 @@ jobs:
 
       - name: Run tests
         run: |
-          python -m pytest test_service.py -v --tb=short
+          python test_service.py
 
       - name: Smoke test server startup
         run: |
